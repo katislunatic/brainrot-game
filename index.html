@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brainrot Merge Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+        canvas { border: 5px solid #333; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #ui { position: absolute; top: 20px; color: white; text-align: center; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="ui"><h1>Brainrot Merge</h1><p>Click to Drop</p></div>
+
+    <script>
+        const { Engine, Render, Runner, Bodies, Composite, Events } = Matter;
+
+        // --- CUSTOMIZE YOUR NAMES HERE ---
+        const TIERS = [
+            { label: "Tier1", radius: 25, color: "#ff5555" }, // e.g., "Skibidi"
+            { label: "Tier2", radius: 40, color: "#55ff55" }, // e.g., "Rizzler"
+            { label: "Tier3", radius: 60, color: "#5555ff" }, // e.g., "Ohio"
+            { label: "Tier4", radius: 85, color: "#ffff55" }, // e.g., "Mewing"
+            { label: "Tier5", radius: 110, color: "#ff55ff" } // Final Form
+        ];
+
+        const engine = Engine.create();
+        const render = Render.create({
+            element: document.body,
+            engine: engine,
+            options: { width: 450, height: 700, wireframes: false, background: '#111' }
+        });
+
+        // Create the Bucket (Walls and Floor)
+        const ground = Bodies.rectangle(225, 690, 450, 20, { isStatic: true, render: { fillStyle: '#333' } });
+        const leftWall = Bodies.rectangle(5, 350, 10, 700, { isStatic: true, render: { fillStyle: '#333' } });
+        const rightWall = Bodies.rectangle(445, 350, 10, 700, { isStatic: true, render: { fillStyle: '#333' } });
+        Composite.add(engine.world, [ground, leftWall, rightWall]);
+
+        // Drop Mechanic
+        window.addEventListener("mousedown", (e) => {
+            const dropX = Math.max(30, Math.min(e.clientX - render.canvas.offsetLeft, 420));
+            const tier = TIERS[0]; // Always drop the smallest tier
+            
+            const fruit = Bodies.circle(dropX, 50, tier.radius, {
+                label: tier.label,
+                restitution: 0.3,
+                render: { fillStyle: tier.color }
+                // To use images, add: sprite: { texture: './your-image.png' }
+            });
+            Composite.add(engine.world, fruit);
+        });
+
+        // Merge Logic
+        Events.on(engine, 'collisionStart', (event) => {
+            event.pairs.forEach((pair) => {
+                const { bodyA, bodyB } = pair;
+                if (bodyA.label === bodyB.label && !bodyA.isStatic && !bodyB.isStatic) {
+                    const currentTierIndex = TIERS.findIndex(t => t.label === bodyA.label);
+                    const nextTier = TIERS[currentTierIndex + 1];
+
+                    if (nextTier) {
+                        const midX = (bodyA.position.x + bodyB.position.x) / 2;
+                        const midY = (bodyA.position.y + bodyB.position.y) / 2;
+
+                        Composite.remove(engine.world, [bodyA, bodyB]);
+                        
+                        const newFruit = Bodies.circle(midX, midY, nextTier.radius, {
+                            label: nextTier.label,
+                            render: { fillStyle: nextTier.color }
+                        });
+                        Composite.add(engine.world, newFruit);
+                    }
+                }
+            });
+        });
+
+        Render.run(render);
+        Runner.run(Runner.create(), engine);
+    </script>
+</body>
+</html>
