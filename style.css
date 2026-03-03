@@ -1,0 +1,49 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #ffe4e1; /* The pink background from your image */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+}
+
+#score-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 60px;
+    font-weight: bold;
+    background: linear-gradient(to bottom, #ff33cc, #ff9933);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(3px 3px 0px white);
+}
+
+#next-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 90px;
+    height: 90px;
+    background: #ffd700;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+#next-preview {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ff5e5e; /* Default color */
+    transition: background-color 0.3s ease;
+}
+
+canvas {
+    cursor: crosshair;
+}
