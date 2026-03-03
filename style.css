@@ -2,12 +2,12 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #ffe4e1; /* Pink background */
+    background-color: #ffe4e1;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    font-family: 'Arial Rounded MT Bold', sans-serif;
+    font-family: sans-serif;
 }
 
 #score-container {
@@ -15,10 +15,9 @@ body {
     top: 20px;
     left: 20px;
     font-size: 60px;
-    background: linear-gradient(to bottom, #ff33cc, #ff9933);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(2px 2px 0px white);
+    font-weight: bold;
+    color: #ff69b4;
+    text-shadow: 2px 2px white;
     z-index: 10;
 }
 
@@ -33,7 +32,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     z-index: 10;
 }
 
@@ -46,6 +44,5 @@ body {
 }
 
 canvas {
-    background-color: #fffafa; 
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    background: transparent;
 }
