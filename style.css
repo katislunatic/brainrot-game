@@ -4,7 +4,7 @@ body {
     overflow: hidden;
     background-color: #ffe4e1; /* Pink background */
     display: flex;
-    justify-content: center;
+    justify-content: center; /* Centers the bucket horizontally */
     align-items: center;
     height: 100vh;
     font-family: 'Arial Rounded MT Bold', sans-serif;
@@ -41,8 +41,11 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
+    background-color: #ff5e5e;
 }
 
 canvas {
+    background-color: #fffafa; /* Play area color */
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
     cursor: crosshair;
 }
