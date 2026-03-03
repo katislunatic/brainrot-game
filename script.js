@@ -1,6 +1,8 @@
 const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
 
-// 1. DATA: Make sure these filenames match your assets folder EXACTLY
+// SET THIS to the actual width/height of your PNG files (e.g., 512, 256, or 100)
+const IMAGE_SIZE = 512; 
+
 const TIERS = [
     { label: "Tier1", radius: 20, asset: './assets/tier1.png', color: '#ff5e5e' }, 
     { label: "Tier2", radius: 30, asset: './assets/tier2.png', color: '#5efaff' },
@@ -18,34 +20,37 @@ const engine = Engine.create();
 const render = Render.create({
     element: document.body,
     engine: engine,
-    options: { 
-        width: 450, 
-        height: 750, 
-        wireframes: false, 
-        background: 'transparent' 
-    }
+    options: { width: 450, height: 750, wireframes: false, background: 'transparent' }
 });
 
-// 2. THE BUCKET (Centered and Visible)
-const wallStyle = { fillStyle: '#2c2c2c', visible: true };
+// Create Bucket
+const wallStyle = { fillStyle: '#2c2c2c' };
 const ground = Bodies.rectangle(225, 740, 450, 40, { isStatic: true, render: wallStyle });
 const leftWall = Bodies.rectangle(5, 375, 10, 750, { isStatic: true, render: wallStyle });
 const rightWall = Bodies.rectangle(445, 375, 10, 750, { isStatic: true, render: wallStyle });
 Composite.add(engine.world, [ground, leftWall, rightWall]);
 
-// Function to handle the Sprite math
-function getRenderOptions(tier) {
-    return {
-        sprite: {
-            texture: tier.asset,
-            // Adjust '512' to the actual width of your PNG files
-            xScale: (tier.radius * 2) / 512, 
-            yScale: (tier.radius * 2) / 512
+function createBrainrot(x, y, tier) {
+    const scale = (tier.radius * 2) / IMAGE_SIZE;
+    return Bodies.circle(x, y, tier.radius, {
+        label: tier.label,
+        restitution: 0.3,
+        render: {
+            sprite: {
+                texture: tier.asset,
+                xScale: scale,
+                yScale: scale
+            }
         }
-    };
+    });
 }
 
-// 3. DROP LOGIC
+function updateNextUI() {
+    const preview = document.getElementById('next-preview');
+    preview.style.backgroundImage = `url('${TIERS[nextTierIndex].asset}')`;
+}
+updateNextUI();
+
 window.addEventListener("mousedown", (e) => {
     if (!canDrop) return;
     const rect = render.canvas.getBoundingClientRect();
@@ -54,27 +59,15 @@ window.addEventListener("mousedown", (e) => {
     if (dropX > 30 && dropX < 420) {
         canDrop = false; 
         const tier = TIERS[nextTierIndex];
-        
-        const obj = Bodies.circle(dropX, 50, tier.radius, {
-            label: tier.label,
-            restitution: 0.3,
-            render: getRenderOptions(tier)
-        });
-
+        const obj = createBrainrot(dropX, 50, tier);
         Composite.add(engine.world, obj);
 
         nextTierIndex = Math.floor(Math.random() * 2);
-        // Update the gold circle preview
-        const preview = document.getElementById('next-preview');
-        preview.style.backgroundImage = `url('${TIERS[nextTierIndex].asset}')`;
-        preview.style.backgroundSize = "contain";
-        preview.style.backgroundRepeat = "no-repeat";
-
+        updateNextUI();
         setTimeout(() => { canDrop = true; }, 600);
     }
 });
 
-// 4. MERGE LOGIC
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair;
@@ -86,16 +79,10 @@ Events.on(engine, 'collisionStart', (event) => {
                 const newY = (bodyA.position.y + bodyB.position.y) / 2;
 
                 Composite.remove(engine.world, [bodyA, bodyB]);
-                
                 score += (index + 1) * 2;
                 document.getElementById('score-container').innerText = score;
 
-                const merged = Bodies.circle(newX, newY, next.radius, {
-                    label: next.label,
-                    render: getRenderOptions(next),
-                    restitution: 0.4
-                });
-
+                const merged = createBrainrot(newX, newY, next);
                 Body.setVelocity(merged, { x: 0, y: -3 });
                 Composite.add(engine.world, merged);
             }
