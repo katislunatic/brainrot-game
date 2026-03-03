@@ -1,6 +1,6 @@
 const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
 
-// 1. DATA: Change these colors/radii as you like
+// 1. YOUR BRAINROT TIERS
 const TIERS = [
     { label: "Tier1", radius: 18, color: "#ff5e5e" }, 
     { label: "Tier2", radius: 28, color: "#5efaff" },
@@ -26,11 +26,13 @@ const render = Render.create({
     }
 });
 
-// 2. THE BARRIERS (Black/Dark Grey)
+// 2. THE VISIBLE BARRIERS (The "Bucket")
 const wallStyle = { fillStyle: '#2c2c2c', visible: true };
-const ground = Bodies.rectangle(225, 740, 450, 20, { isStatic: true, render: wallStyle });
-const leftWall = Bodies.rectangle(5, 375, 10, 750, { isStatic: true, render: wallStyle });
-const rightWall = Bodies.rectangle(445, 375, 10, 750, { isStatic: true, render: wallStyle });
+
+// Ground and Side Walls (20px thick to be visible)
+const ground = Bodies.rectangle(225, 740, 450, 40, { isStatic: true, render: wallStyle });
+const leftWall = Bodies.rectangle(0, 375, 20, 750, { isStatic: true, render: wallStyle });
+const rightWall = Bodies.rectangle(450, 375, 20, 750, { isStatic: true, render: wallStyle });
 
 Composite.add(engine.world, [ground, leftWall, rightWall]);
 
@@ -41,8 +43,8 @@ window.addEventListener("mousedown", (e) => {
     const rect = render.canvas.getBoundingClientRect();
     const dropX = e.clientX - rect.left;
     
-    // Boundary check so items don't spawn inside walls
-    if (dropX > 25 && dropX < 425) {
+    // Prevent spawning inside walls
+    if (dropX > 30 && dropX < 420) {
         canDrop = false; 
         
         const currentTier = TIERS[nextTierIndex];
@@ -54,16 +56,16 @@ window.addEventListener("mousedown", (e) => {
 
         Composite.add(engine.world, obj);
 
-        // Update Next Preview (Randomly picks Tier 1 or 2)
+        // Randomize next item and update UI
         nextTierIndex = Math.floor(Math.random() * 2);
         document.getElementById('next-preview').style.backgroundColor = TIERS[nextTierIndex].color;
 
-        // Cooldown timer (0.6 seconds)
+        // Cooldown timer
         setTimeout(() => { canDrop = true; }, 600);
     }
 });
 
-// 4. MERGE LOGIC
+// 4. MERGE LOGIC (With "Pop" effect)
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair;
@@ -87,11 +89,23 @@ Events.on(engine, 'collisionStart', (event) => {
                     restitution: 0.4
                 });
 
-                // The "Pop" effect - adds a tiny upward bounce
+                // Velocity pop makes it feel juicy
                 Body.setVelocity(merged, { x: 0, y: -3 });
                 
                 Composite.add(engine.world, merged);
             }
+        }
+    });
+});
+
+// 5. GAME OVER CHECK
+Events.on(engine, 'afterUpdate', () => {
+    const bodies = Composite.allBodies(engine.world);
+    bodies.forEach(body => {
+        if (!body.isStatic && body.position.y < 100 && body.velocity.y < 0.1) {
+            // If something is stuck at the top
+            console.log("Game Over Warning");
+            // You can add an alert or screen here
         }
     });
 });
