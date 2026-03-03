@@ -2,12 +2,12 @@ const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
 
 // 1. YOUR BRAINROT TIERS
 const TIERS = [
-    { label: "Tier1", radius: 18, color: "#ff5e5e" }, 
-    { label: "Tier2", radius: 28, color: "#5efaff" },
-    { label: "Tier3", radius: 40, color: "#9f5eff" },
-    { label: "Tier4", radius: 55, color: "#ffdc5e" },
-    { label: "Tier5", radius: 75, color: "#5eff6c" },
-    { label: "Tier6", radius: 100, color: "#ff8c00" }
+    { label: "Tier1", radius: 18, asset: './assets/tier1.png' }, 
+    { label: "Tier2", radius: 28, asset: './assets/tier2.png' },
+    { label: "Tier3", radius: 40, asset: './assets/tier3.png' },
+    { label: "Tier4", radius: 55, asset: './assets/tier4.png' },
+    { label: "Tier5", radius: 75, asset: './assets/tier5.png' },
+    { label: "Tier6", radius: 100, asset: './assets/tier6.png' }
 ];
 
 let score = 0;
