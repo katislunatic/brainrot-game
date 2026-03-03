@@ -1,15 +1,13 @@
 const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
 
-// SET THIS to the actual width/height of your PNG files (e.g., 512, 256, or 100)
-const IMAGE_SIZE = 512; 
-
+// 1. UPDATED TIERS: Bigger Radii for a better feel
 const TIERS = [
-    { label: "Tier1", radius: 20, asset: './assets/tier1.png', color: '#ff5e5e' }, 
-    { label: "Tier2", radius: 30, asset: './assets/tier2.png', color: '#5efaff' },
-    { label: "Tier3", radius: 45, asset: './assets/tier3.png', color: '#9f5eff' },
-    { label: "Tier4", radius: 60, asset: './assets/tier4.png', color: '#ffdc5e' },
-    { label: "Tier5", radius: 85, asset: './assets/tier5.png', color: '#5eff6c' },
-    { label: "Tier6", radius: 110, asset: './assets/tier6.png', color: '#ff8c00' }
+    { label: "Tier1", radius: 25, asset: './assets/tier1.png' }, 
+    { label: "Tier2", radius: 35, asset: './assets/tier2.png' },
+    { label: "Tier3", radius: 50, asset: './assets/tier3.png' },
+    { label: "Tier4", radius: 70, asset: './assets/tier4.png' },
+    { label: "Tier5", radius: 95, asset: './assets/tier5.png' },
+    { label: "Tier6", radius: 125, asset: './assets/tier6.png' }
 ];
 
 let score = 0;
@@ -20,18 +18,28 @@ const engine = Engine.create();
 const render = Render.create({
     element: document.body,
     engine: engine,
-    options: { width: 450, height: 750, wireframes: false, background: 'transparent' }
+    options: { 
+        width: 450, 
+        height: 750, 
+        wireframes: false, 
+        background: 'transparent' 
+    }
 });
 
-// Create Bucket
+// 2. THE BUCKET (Visible Black Barriers)
 const wallStyle = { fillStyle: '#2c2c2c' };
 const ground = Bodies.rectangle(225, 740, 450, 40, { isStatic: true, render: wallStyle });
-const leftWall = Bodies.rectangle(5, 375, 10, 750, { isStatic: true, render: wallStyle });
-const rightWall = Bodies.rectangle(445, 375, 10, 750, { isStatic: true, render: wallStyle });
+const leftWall = Bodies.rectangle(10, 375, 20, 750, { isStatic: true, render: wallStyle });
+const rightWall = Bodies.rectangle(440, 375, 20, 750, { isStatic: true, render: wallStyle });
 Composite.add(engine.world, [ground, leftWall, rightWall]);
 
+// 3. HELPER: This math fixes the "too small" image problem
 function createBrainrot(x, y, tier) {
-    const scale = (tier.radius * 2) / IMAGE_SIZE;
+    // If your images are still small, change '100' to '50' or '200' 
+    // until it looks perfect for your specific PNG files.
+    const imageBaseSize = 100; 
+    const scale = (tier.radius * 2) / imageBaseSize;
+
     return Bodies.circle(x, y, tier.radius, {
         label: tier.label,
         restitution: 0.3,
@@ -48,18 +56,20 @@ function createBrainrot(x, y, tier) {
 function updateNextUI() {
     const preview = document.getElementById('next-preview');
     preview.style.backgroundImage = `url('${TIERS[nextTierIndex].asset}')`;
+    preview.style.backgroundSize = "contain";
 }
 updateNextUI();
 
+// 4. DROP LOGIC
 window.addEventListener("mousedown", (e) => {
     if (!canDrop) return;
     const rect = render.canvas.getBoundingClientRect();
     const dropX = e.clientX - rect.left;
     
-    if (dropX > 30 && dropX < 420) {
+    if (dropX > 40 && dropX < 410) {
         canDrop = false; 
         const tier = TIERS[nextTierIndex];
-        const obj = createBrainrot(dropX, 50, tier);
+        const obj = createBrainrot(dropX, 80, tier);
         Composite.add(engine.world, obj);
 
         nextTierIndex = Math.floor(Math.random() * 2);
@@ -68,6 +78,7 @@ window.addEventListener("mousedown", (e) => {
     }
 });
 
+// 5. MERGE LOGIC
 Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair;
