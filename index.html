@@ -3,15 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brainrot Merge</title>
+    <title>Brainrot Merge - Idle Fusion</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="score-container">0</div>
-    <div id="next-container">
-        <div id="next-preview"></div>
+    <div class="game-wrapper">
+        <div class="ui-panel">
+            <div class="stat-group">
+                <div class="stat-item">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="score-display">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Combo</div>
+                    <div class="stat-value" id="combo-display">0</div>
+                </div>
+            </div>
+            <div class="next-preview">
+                <img id="next-image" src="./assets/tier1.png" alt="next">
+            </div>
+        </div>
+
+        <div class="combo-display" id="combo-popup"></div>
+
+        <div class="instructions">
+            Click to drop • Merge to level up
+        </div>
+
+        <div class="game-over-modal" id="gameOverModal">
+            <div class="game-over-content">
+                <div class="game-over-title">Game Over</div>
+                <div class="game-over-score" id="finalScore">0</div>
+                <button class="reset-button" onclick="location.reload()">Play Again</button>
+            </div>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script src="./script.js"></script>
 </body>
 </html>
