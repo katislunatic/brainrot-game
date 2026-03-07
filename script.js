@@ -220,8 +220,8 @@ function handleDrop(clientX, clientY) {
         
         playSound('drop');
         
-        // Only spawn Tier 1 and Tier 2
-        gameState.nextTierIndex = Math.floor(Math.random() * 2); // 0 or 1 (Tier1 or Tier2)
+        // Only spawn Tier 1 and Tier 2 (Tier 1 is 70% likely, Tier 2 is 30% likely)
+        gameState.nextTierIndex = Math.random() < 0.7 ? 0 : 1;
         updateNextUI();
         
         setTimeout(() => {
