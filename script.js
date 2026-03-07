@@ -220,8 +220,8 @@ function handleDrop(clientX, clientY) {
         
         playSound('drop');
         
-        // Random next tier (biased towards early tiers)
-        gameState.nextTierIndex = Math.floor(Math.random() * Math.min(3, TIERS.length));
+        // Only spawn Tier 1 and Tier 2
+        gameState.nextTierIndex = Math.floor(Math.random() * 2); // 0 or 1 (Tier1 or Tier2)
         updateNextUI();
         
         setTimeout(() => {
