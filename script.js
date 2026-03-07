@@ -193,18 +193,18 @@ function playSound(type) {
     }
 }
 
-// Drop Handler
-window.addEventListener('mousedown', (e) => {
+// Drop Handler - Works with mouse and touch
+function handleDrop(clientX, clientY) {
     if (!gameState.canDrop || gameState.gameOver) return;
     
     const canvas = document.getElementById('game-canvas');
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
-    const dropX = e.clientX - rect.left;
-    const dropY = e.clientY - rect.top;
+    const dropX = clientX - rect.left;
+    const dropY = clientY - rect.top;
     
-    // Only allow drops within canvas bounds
+    // Check if click is within canvas bounds
     if (dropX < 0 || dropX > CONFIG.CANVAS_WIDTH || dropY < 0 || dropY > CONFIG.CANVAS_HEIGHT) {
         return;
     }
@@ -228,7 +228,21 @@ window.addEventListener('mousedown', (e) => {
             gameState.canDrop = true;
         }, CONFIG.DROP_COOLDOWN);
     }
+}
+
+// Mouse events
+window.addEventListener('mousedown', (e) => {
+    handleDrop(e.clientX, e.clientY);
 });
+
+// Touch events (for mobile)
+window.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent default touch behavior
+    if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        handleDrop(touch.clientX, touch.clientY);
+    }
+}, { passive: false });
 
 // Collision Detection
 Events.on(engine, 'collisionStart', (event) => {
