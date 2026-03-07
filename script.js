@@ -33,8 +33,16 @@ let gameState = {
 
 // Physics Engine Setup
 const engine = Engine.create();
+
+// Create and insert canvas
+const canvas = document.createElement('canvas');
+canvas.id = 'game-canvas';
+canvas.width = CONFIG.CANVAS_WIDTH;
+canvas.height = CONFIG.CANVAS_HEIGHT;
+document.querySelector('.game-wrapper').insertBefore(canvas, document.querySelector('.ui-panel').nextSibling);
+
 const render = Render.create({
-    canvas: document.createElement('canvas'),
+    canvas: canvas,
     engine: engine,
     options: {
         width: CONFIG.CANVAS_WIDTH,
@@ -43,8 +51,6 @@ const render = Render.create({
         background: 'transparent'
     }
 });
-document.querySelector('.game-wrapper').appendChild(render.canvas);
-render.canvas.id = 'game-canvas';
 
 // Create Walls
 const wallStyle = { fillStyle: '#2c2c2c' };
@@ -62,20 +68,37 @@ const rightWall = Bodies.rectangle(CONFIG.CANVAS_WIDTH - 10, CONFIG.CANVAS_HEIGH
 });
 Composite.add(engine.world, [ground, leftWall, rightWall]);
 
+// Color palette for tiers
+const TIER_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
+
 // Utility Functions
 function createBrainrot(x, y, tier) {
-    const scale = (tier.radius * 2) / CONFIG.IMAGE_WIDTH;
-    return Bodies.circle(x, y, tier.radius, {
+    const tierIndex = TIERS.findIndex(t => t.label === tier.label);
+    const color = TIER_COLORS[tierIndex] || '#999';
+    
+    // Try to load sprite if available, otherwise use color
+    const body = Bodies.circle(x, y, tier.radius, {
         label: tier.label,
         restitution: CONFIG.RESTITUTION,
         render: {
-            sprite: {
-                texture: tier.asset,
-                xScale: scale,
-                yScale: scale
-            }
+            fillStyle: color,
+            strokeStyle: 'rgba(255,255,255,0.3)',
+            lineWidth: 2
         }
     });
+    
+    // Try to add sprite texture if asset exists
+    try {
+        body.render.sprite = {
+            texture: tier.asset,
+            xScale: (tier.radius * 2) / CONFIG.IMAGE_WIDTH,
+            yScale: (tier.radius * 2) / CONFIG.IMAGE_WIDTH
+        };
+    } catch (e) {
+        // Silently fail if sprite not found, use color instead
+    }
+    
+    return body;
 }
 
 function updateNextUI() {
@@ -121,18 +144,25 @@ function showComboPopup() {
 
 function checkGameOver() {
     const bodies = Composite.allBodies(engine.world);
+    let highestY = CONFIG.CANVAS_HEIGHT;
     
     for (let body of bodies) {
         // Only check game pieces (not walls)
         if (!body.isStatic && body.label && body.label.startsWith('Tier')) {
-            // Game over if any piece goes above the drop zone (y < 100)
-            if (body.position.y < 100) {
-                console.log(`Game Over! Piece ${body.label} reached y: ${body.position.y}`);
+            // Find the highest piece
+            if (body.position.y < highestY) {
+                highestY = body.position.y;
+            }
+            
+            // Game over if any piece goes way above the canvas (plenty of buffer)
+            if (body.position.y < 50) {
+                console.log(`Game Over! Piece ${body.label} reached critical height y: ${body.position.y}`);
                 triggerGameOver();
                 return true;
             }
         }
     }
+    
     return false;
 }
 
@@ -170,8 +200,17 @@ function playSound(type) {
 window.addEventListener('mousedown', (e) => {
     if (!gameState.canDrop || gameState.gameOver) return;
     
-    const rect = render.canvas.getBoundingClientRect();
+    const canvas = document.getElementById('game-canvas');
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
     const dropX = e.clientX - rect.left;
+    const dropY = e.clientY - rect.top;
+    
+    // Only allow drops within canvas bounds
+    if (dropX < 0 || dropX > CONFIG.CANVAS_WIDTH || dropY < 0 || dropY > CONFIG.CANVAS_HEIGHT) {
+        return;
+    }
     
     // Boundary check with padding
     const padding = 40;
