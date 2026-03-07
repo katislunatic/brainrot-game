@@ -1,48 +1,251 @@
-body {
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@600;700;800&display=swap');
+
+body {
+    font-family: 'Fredoka', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
-    background-color: #ffe4e1;
+}
+
+.game-wrapper {
+    position: relative;
+    width: 450px;
+    height: 750px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(100,50,150,0.2) 100%);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.15);
+}
+
+#game-canvas {
+    display: block !important;
+    background: transparent !important;
+}
+
+.ui-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 100%);
+    backdrop-filter: blur(8px);
+}
+
+.stat-group {
+    display: flex;
+    gap: 16px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.6);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    color: #fff;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    line-height: 1;
+}
+
+.next-preview {
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    font-family: sans-serif;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 0.2s ease;
 }
 
-#score-container {
+.next-preview:hover {
+    transform: scale(1.05);
+}
+
+.next-preview img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.combo-display {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 60px;
-    font-weight: bold;
-    color: #ff69b4;
-    text-shadow: 2px 2px white;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.combo-text {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 600;
+}
+
+.combo-number {
+    font-size: 48px;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffd700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(255,107,157,0.4);
+    animation: comboPulse 0.4s ease;
+}
+
+@keyframes comboPulse {
+    0% {
+        transform: scale(0.8) translateY(10px);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.instructions {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
     z-index: 10;
 }
 
-#next-container {
+.game-over-modal {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 80px;
-    height: 80px;
-    background: #ffd700;
-    border-radius: 50%;
-    display: flex;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 200;
+    backdrop-filter: blur(4px);
 }
 
-#next-preview {
-    width: 50px;
-    height: 50px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+.game-over-modal.active {
+    display: flex;
 }
 
-canvas {
-    background: transparent;
+.game-over-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    border: 2px solid rgba(255,255,255,0.2);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.game-over-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 12px;
+    font-family: 'Outfit', sans-serif;
+}
+
+.game-over-score {
+    font-size: 48px;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffd700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 24px;
+}
+
+.reset-button {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff1493 100%);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(255,107,157,0.3);
+    transition: all 0.2s ease;
+    font-family: 'Fredoka', sans-serif;
+}
+
+.reset-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(255,107,157,0.4);
+}
+
+.reset-button:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 500px) {
+    .game-wrapper {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .next-preview {
+        width: 70px;
+        height: 70px;
+    }
 }
