@@ -17,7 +17,6 @@ const CONFIG = {
     MERGE_COMBO_TIMEOUT: 1500,
     RESTITUTION: 0.3,
     IMAGE_WIDTH: 120,
-    TOP_BOUNDARY: 100,
     BOTTOM_BOUNDARY: 720
 };
 
@@ -122,10 +121,16 @@ function showComboPopup() {
 
 function checkGameOver() {
     const bodies = Composite.allBodies(engine.world);
+    
     for (let body of bodies) {
-        if (!body.isStatic && body.position.y < CONFIG.TOP_BOUNDARY) {
-            triggerGameOver();
-            return true;
+        // Only check game pieces (not walls)
+        if (!body.isStatic && body.label && body.label.startsWith('Tier')) {
+            // Game over if any piece goes above the drop zone (y < 100)
+            if (body.position.y < 100) {
+                console.log(`Game Over! Piece ${body.label} reached y: ${body.position.y}`);
+                triggerGameOver();
+                return true;
+            }
         }
     }
     return false;
@@ -225,12 +230,12 @@ Events.on(engine, 'collisionStart', (event) => {
     });
 });
 
-// Game Loop
-Events.on(engine, 'afterUpdate', () => {
+// Game Loop with Game Over Check
+let gameOverCheckInterval = setInterval(() => {
     if (!gameState.gameOver) {
         checkGameOver();
     }
-});
+}, 100);
 
 // Initialize
 updateNextUI();
