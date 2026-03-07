@@ -76,27 +76,24 @@ function createBrainrot(x, y, tier) {
     const tierIndex = TIERS.findIndex(t => t.label === tier.label);
     const color = TIER_COLORS[tierIndex] || '#999';
     
-    // Try to load sprite if available, otherwise use color
+    const scale = (tier.radius * 2) / CONFIG.IMAGE_WIDTH;
+    
+    // Create body with sprite support
     const body = Bodies.circle(x, y, tier.radius, {
         label: tier.label,
         restitution: CONFIG.RESTITUTION,
         render: {
+            sprite: {
+                texture: tier.asset,
+                xScale: scale,
+                yScale: scale
+            },
+            // Fallback to color if sprite fails
             fillStyle: color,
             strokeStyle: 'rgba(255,255,255,0.3)',
             lineWidth: 2
         }
     });
-    
-    // Try to add sprite texture if asset exists
-    try {
-        body.render.sprite = {
-            texture: tier.asset,
-            xScale: (tier.radius * 2) / CONFIG.IMAGE_WIDTH,
-            yScale: (tier.radius * 2) / CONFIG.IMAGE_WIDTH
-        };
-    } catch (e) {
-        // Silently fail if sprite not found, use color instead
-    }
     
     return body;
 }
@@ -283,3 +280,7 @@ Runner.run(Runner.create(), engine);
 
 console.log('🎮 Brainrot Merge started!');
 console.log('💡 Tip: Merge identical items to create higher tiers and build your combo!');
+console.log('📊 Canvas size:', CONFIG.CANVAS_WIDTH, 'x', CONFIG.CANVAS_HEIGHT);
+console.log('🎨 Tier colors:', TIER_COLORS);
+console.log('📁 Asset paths:', TIERS.map(t => t.asset));
+console.log('✅ Game ready! Click to drop pieces.');
